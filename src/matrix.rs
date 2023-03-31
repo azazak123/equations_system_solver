@@ -1,3 +1,4 @@
+#![allow(clippy::needless_range_loop)]
 use std::ops::Mul;
 
 use crate::Element;
@@ -86,6 +87,22 @@ impl<T: Element> Matrix<T> {
             .map(|arr| arr.iter().cloned().map(|el| el.abs()).sum())
             .reduce(|acc, el| if el > acc { el } else { acc })
             .unwrap()
+    }
+}
+
+impl<T: Element> Mul<T> for Matrix<T> {
+    type Output = Self;
+
+    fn mul(self, rhs: T) -> Self::Output {
+        let mut result = vec![vec![T::zero(); self.m]; self.n];
+
+        for i in 0..self.n {
+            for j in 0..self.m {
+                result[i][j] = rhs * self.values[i][j]
+            }
+        }
+
+        Matrix::new(result).unwrap()
     }
 }
 

@@ -1,5 +1,5 @@
 pub mod element;
-mod matrix;
+pub mod matrix;
 
 use element::Element;
 use matrix::Matrix;
@@ -71,6 +71,7 @@ pub fn solve_iteration<T: Element>(
     let mut answers_dominated = answers.to_owned();
 
     while !coeffs_dominated.is_diagonal_row_dominated() {
+        #[allow(clippy::needless_range_loop)]
         for i in 0..coeffs_dominated.n {
             if coeffs_dominated.values[i][i] < T::zero() {
                 coeffs_dominated.values[i] = coeffs_dominated.values[i]
