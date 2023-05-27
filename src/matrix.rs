@@ -40,29 +40,47 @@ impl<T: Element> Matrix<T> {
             return None;
         }
 
-        if self.n == 2 {
-            Some(self.values[0][0] * self.values[1][1] - self.values[0][1] * self.values[1][0])
-        } else {
-            Some(
-                self.values[0]
-                    .iter()
-                    .enumerate()
-                    .map(|(i, elem)| {
-                        let mut addend = vec![];
+        let n = self.n;
 
-                        addend.extend(self.values[1..].iter().map(|arr| {
-                            let mut r = arr[0..i].to_owned();
-                            r.extend_from_slice(&arr[i + 1..]);
-                            r
-                        }));
-
-                        (-T::one()).pow(if i % 2 == 0 { 1 } else { 2 })
-                            * *elem
-                            * Matrix::new(addend).unwrap().det().unwrap()
-                    })
-                    .sum(),
-            )
+        if n == 1 {
+            return Some(self.values[0][0]);
         }
+
+        let mut result = T::one();
+        let mut matrix = self.values.to_vec();
+
+        for i in 0..n {
+            let mut max_row = i;
+
+            for j in (i + 1)..n {
+                if matrix[j][i].abs() > matrix[max_row][i].abs() {
+                    max_row = j;
+                }
+            }
+
+            if max_row != i {
+                matrix.swap(max_row, i);
+                result = result * -T::one();
+            }
+
+            let pivot = matrix[i][i];
+
+            if pivot.is_zero() {
+                return Some(pivot);
+            }
+
+            result = result * pivot;
+
+            for j in (i + 1)..n {
+                let factor = matrix[j][i] / pivot;
+
+                for k in i..n {
+                    matrix[j][k] = matrix[j][k] - matrix[i][k] * factor;
+                }
+            }
+        }
+
+        Some(result)
     }
 
     pub fn is_diagonal_row_dominated(&self) -> bool {
